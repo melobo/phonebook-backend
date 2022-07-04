@@ -1,7 +1,18 @@
 const express = require('express')
 const app = express()
+const morgan = require('morgan')
 
 app.use(express.json())
+app.use(morgan(function (tokens, req, res) {
+  return [
+    tokens.method(req, res),
+    tokens.url(req, res),
+    tokens.status(req, res),
+    tokens.res(req, res, 'content-length'), '-',
+    tokens['response-time'](req, res), 'ms',
+    JSON.stringify(req.body)
+  ].join(' ')
+}))
 
 let persons = [
   { 
@@ -49,7 +60,7 @@ app.get('/api/persons/:id', (request, response) => {
     response.json(person)
   } else {
     response.statusMessage = "Person not found.";
-    response.status(404).end()
+    response.status(204).end()
   }
 })
 
